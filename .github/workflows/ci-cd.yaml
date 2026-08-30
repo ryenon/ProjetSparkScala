@@ -5,7 +5,7 @@ on:
     # Declenchement automatique sur la branche "develop"
     branches:
       - develop
-  pull_requests:
+  pull_request:
     branches:
       - develop
 
@@ -40,7 +40,7 @@ jobs:
 
   build-and-push:
     needs: setup-env
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - name: checkout code
         uses: actions/checkout@v4
