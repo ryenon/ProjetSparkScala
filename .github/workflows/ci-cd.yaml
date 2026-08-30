@@ -1,0 +1,168 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    # Declenchement automatique sur la branche "develop"
+    branches:
+      - develop
+  pull_requests:
+    branches:
+      - develop
+
+  # Action manuelle pour les branches "staging" et "prod"
+  workflow_dispatch:
+    inputs:
+      environnement:
+        description: 'Selectionner l''environnement de deploiement'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - prod
+
+jobs:
+  # -------------------------------------------------------------
+  # JOB 1 : Détermination des variables selon la branche ou le choix manuel
+  # -------------------------------------------------------------
+  setup-env:
+    runs-on: ubuntu-latest
+    outputs:
+      env_name: ${{ steps.set-env.outputs.ENV_NAME }}
+    steps:
+      - id: set-env
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "ENV_NAME=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          else
+            echo "ENV_NAME=develop" >> $GITHUB_OUTPUT
+          fi
+
+  build-and-push:
+    needs: setup-env
+    run-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '1.8'
+          cache: 'maven'
+
+      - name: Cache Maven depencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{runner.os}}-maven-${{hashFiles('**/pom.xml')}}
+          restore-keys: ${{runner.os}}-maven
+      # Compilation, exécution des tests unitaires et création du Fat JAR
+      - name: Build and Test Maven
+        run: mvn clean package
+
+      - name: Copy Files to SSH
+        run: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "target/*.jar, Dockerfile"
+          target: /opt/techstore
+          strip_components: 0
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-actions@v3
+
+      - name: Log in to Docker
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Construction et push de l'image taggée avec le nom de l'environnement (develop, staging ou prod)
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/spark-app:${{ needs.setup-env.outputs.env_name }}
+            ${{ secrets.DOCKER_USERNAME }}/spark-app:${{ github.sha }}
+  # -------------------------------------------------------------
+  # JOB 3 : Déploiement sécurisé sur le VPS (Utilisateur ryenon)
+  # -------------------------------------------------------------
+  deploy:
+    needs: [setup-env, build-and-push]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script_stop: true
+          script: |
+            # Définition des dossiers spécifiques à l'environnement
+            ENV="${{ needs.setup-env.outputs.env_name }}"
+            APP_DIR="/home/ryenon/app-$ENV"
+
+            # Création de l'arborescence proprement
+            mkdir -p $APP_DIR/files
+
+            # Arrêt et suppression de l'ancien conteneur s'il existe
+            docker stop spark-app-$ENV || true
+            docker rm spark-app-$ENV || true
+
+            # Récupération de la dernière image depuis Docker Hub
+            docker pull ${{ secrets.DOCKER_USERNAME }}/spark-app:$ENV
+
+            # Exécution du conteneur Spark
+            # - Le dossier de données local du VPS ($APP_DIR/files) est monté dans /data du conteneur
+            # - INPUT_PATH est injecté pour guider le code Scala
+            docker run -d \
+              --name spark-app-$ENV \
+              -v $APP_DIR/files:/data \
+              -e INPUT_PATH="/data/donnees.csv" \
+              ${{ secrets.DOCKER_USERNAME }}/spark-app:$ENV
+
+  # -------------------------------------------------------------
+  # JOB 4 : Notification et Rapport par Email
+  # -------------------------------------------------------------
+  notify:
+    needs: [setup-env, deploy]
+    runs-on: ubuntu-latest
+    # S'exécute même si le déploiement échoue pour envoyer un rapport d'échec
+    if: always()
+    steps:
+      - name: Send Deployment Status Email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_HOST }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "[GitHub Actions] Rapport de déploiement - ${{ needs.setup-env.outputs.env_name }}"
+          to: ${{ secrets.EMAIL_RECIPIENT }}
+          from: GitHub Actions CI/CD <${{ secrets.SMTP_USERNAME }}>
+          body: |
+            Bonjour,
+
+            Voici le rapport concernant le pipeline de l'application Spark Scala :
+
+            - **Statut global** : ${{ needs.deploy.result == 'success' && 'SUCCÈS' || 'ÉCHEC' }}
+            - **Environnement ciblé** : ${{ needs.setup-env.outputs.env_name }}
+            - **Déclenché par** : ${{ github.actor }}
+            - **Branche d'origine** : ${{ github.ref_name }}
+            - **Commit SHA** : ${{ github.sha }}
+
+            L'image Docker correspondante a été poussée sur Docker Hub avec le tag : ${{ needs.setup-env.outputs.env_name }}.
+            Le déploiement a été exécuté sur le VPS sous l'utilisateur sécurisé 'ryenon'.
+
+
+
+
+
+
