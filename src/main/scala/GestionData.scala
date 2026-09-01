@@ -73,6 +73,8 @@ object GestionData {
     println("--------- AFFICHAGE DU RESULTAT ------------")
     out.show(5)
 
+    println("Le nombre d'elements dans la base est :" + out.count())
+
 
   }
 
