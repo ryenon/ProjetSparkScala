@@ -63,7 +63,7 @@ jobs:
         run: mvn clean package
 
       - name: Copy Files to SSH
-        run: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
