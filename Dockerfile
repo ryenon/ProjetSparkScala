@@ -9,6 +9,7 @@ ENV HADOOP_VERSION=2.7
 ENV SPARK_HOME=/opt/spark
 ENV PATH=$PATH:$SPARK_HOME/bin
 
+
 # Étape 3 : Installer les outils nécessaires et télécharger les binaires de Spark 2.4.0
 #RUN apt-get update && apt-get install -y wget curl procps && \
  #   wget -q https://apache.org{SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \
@@ -18,7 +19,7 @@ ENV PATH=$PATH:$SPARK_HOME/bin
     #apt-get clean && \
     #rm -rf /var/lib/apt/lists/*
 
-# Étape 3 : Téléchargement et extraction de la version officielle de Spark 2.4.0
+# Étape 3 : Téléchargement et extraction de la version officielle de Spark 2.4.0 forcing
 RUN yum update -y && \
     yum install -y wget curl procps tar gzip && \
     wget -q https://apache.org && \
