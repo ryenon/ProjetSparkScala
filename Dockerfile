@@ -28,7 +28,6 @@ RUN yum update -y && \
     yum clean all && \
     rm -rf /var/cache/yum
 
-
 # Étape 4 : Définir le répertoire de travail pour votre application
 WORKDIR /opt/spark/work-dir
 
