@@ -101,6 +101,7 @@ jobs:
         with:
           context: .
           push: true
+          no-cache: true
           tags: docker.io/ryenon/spark-app:${{ steps.clean.outputs.env }},docker.io/ryenon/spark-app:${{ github.sha }}
           #tags: ${{ secrets.DOCKER_USERNAME }}/spark-app:${{ needs.setup-env.outputs.env_name }},${{ secrets.DOCKER_USERNAME }}/spark-app:${{ github.sha }}
           #tags: ${{ steps.clean.outputs.user }}/spark-app:${{ steps.clean.outputs.env }},${{ steps.clean.outputs.user }}/spark-app:${{ github.sha }}
