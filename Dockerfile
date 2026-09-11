@@ -18,6 +18,7 @@ ENV PATH=$PATH:$SPARK_HOME/bin
     #apt-get clean && \
     #rm -rf /var/lib/apt/lists/*
 
+# Étape 3 : Téléchargement et extraction de la version officielle de Spark 2.4.0
 RUN yum update -y && \
     yum install -y wget curl procps tar gzip && \
     wget -q https://apache.org && \
@@ -26,6 +27,7 @@ RUN yum update -y && \
     rm spark-2.4.0-bin-hadoop2.7.tgz && \
     yum clean all && \
     rm -rf /var/cache/yum
+
 
 # Étape 4 : Définir le répertoire de travail pour votre application
 WORKDIR /opt/spark/work-dir
