@@ -94,7 +94,8 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/spark-app:${{ needs.setup-env.outputs.env_name }},${{ secrets.DOCKER_USERNAME }}/spark-app:${{ github.sha }}
+          #tags: ${{ secrets.DOCKER_USERNAME }}/spark-app:${{ needs.setup-env.outputs.env_name }},${{ secrets.DOCKER_USERNAME }}/spark-app:${{ github.sha }}
+          tags: ${{ steps.string.outputs.user }}/spark-app:${{ needs.setup-env.outputs.env_name }},${{ steps.string.outputs.user }}/spark-app:${{ github.sha }}
           #tags: |
            # ${{ secrets.DOCKER_USERNAME }}/spark-app:${{ needs.setup-env.outputs.env_name }}
            # ${{ secrets.DOCKER_USERNAME }}/spark-app:${{ github.sha }}
