@@ -84,7 +84,7 @@ jobs:
 
       # Construction et push de l'image taggée avec le nom de l'environnement (develop, staging ou prod)
       - name: Format Docker Username to lowercase
-        id: String
+        id: string
         run: |
           # Cette commande prend le secret, le transforme en minuscules et le stocke
           echo "user=$(echo "${{ secrets.DOCKER_USERNAME }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
