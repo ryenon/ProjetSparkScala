@@ -1,5 +1,6 @@
 # Étape 1 : Utiliser une image Java 8 légère officielle (indispensable pour Spark 2.x)
-FROM openjdk:8-jdk-slim
+#FROM openjdk:8-jdk-slim
+FROM jelastic/openjdk:8
 
 # Étape 2 : Définir les variables d'environnement de Spark 2.4.0 et Hadoop 2.7
 ENV SPARK_VERSION=2.4.0
