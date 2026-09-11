@@ -10,13 +10,22 @@ ENV SPARK_HOME=/opt/spark
 ENV PATH=$PATH:$SPARK_HOME/bin
 
 # Étape 3 : Installer les outils nécessaires et télécharger les binaires de Spark 2.4.0
-RUN apt-get update && apt-get install -y wget curl procps && \
+#RUN apt-get update && apt-get install -y wget curl procps && \
+ #   wget -q https://apache.org{SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \
+  #  tar -xzf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \
+   # mv spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} ${SPARK_HOME} && \
+    #rm spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \
+    #apt-get clean && \
+    #rm -rf /var/lib/apt/lists/*
+
+RUN yum update -y && \
+    yum install -y wget curl procps tar gzip && \
     wget -q https://apache.org{SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \
     tar -xzf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \
     mv spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} ${SPARK_HOME} && \
     rm spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    yum clean all && \
+    rm -rf /var/cache/yum
 
 # Étape 4 : Définir le répertoire de travail pour votre application
 WORKDIR /opt/spark/work-dir
