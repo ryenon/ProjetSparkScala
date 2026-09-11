@@ -69,7 +69,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          source: "target/*.jar, Dockerfile"
+          source: "target/*.jar,Dockerfile"
           target: /opt/techstore
           strip_components: 0
 
