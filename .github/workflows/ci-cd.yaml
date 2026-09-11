@@ -84,17 +84,17 @@ jobs:
 
       # Construction et push de l'image taggée avec le nom de l'environnement (develop, staging ou prod)
       - name: Clean Docker Username and Env Name
-          id: clean
-          run: |
-            # Supprime les majuscules et les espaces du nom d'utilisateur
-            CLEAN_USER=$(echo "${{ secrets.DOCKER_USERNAME }}" | tr '[:upper:]' '[:lower:]' | xargs)
+        id: clean
+        run: |
+          # Supprime les majuscules et les espaces du nom d'utilisateur
+          CLEAN_USER=$(echo "${{ secrets.DOCKER_USERNAME }}" | tr '[:upper:]' '[:lower:]' | xargs)
 
-            # Supprime les majuscules, les espaces et les retours à la ligne invisibles du tag
-            CLEAN_ENV=$(echo "${{ needs.setup-env.outputs.env_name }}" | tr '[:upper:]' '[:lower:]' | xargs)
+          # Supprime les majuscules, les espaces et les retours à la ligne invisibles du tag
+          CLEAN_ENV=$(echo "${{ needs.setup-env.outputs.env_name }}" | tr '[:upper:]' '[:lower:]' | xargs)
 
-            # On sauvegarde les deux valeurs propres
-            echo "user=${CLEAN_USER}" >> $GITHUB_OUTPUT
-            echo "env=${CLEAN_ENV}" >> $GITHUB_OUTPUT
+          # On sauvegarde les deux valeurs propres
+          echo "user=${CLEAN_USER}" >> $GITHUB_OUTPUT
+          echo "env=${CLEAN_ENV}" >> $GITHUB_OUTPUT
 
       - name: Build and Push Docker image
         uses: docker/build-push-action@v5
