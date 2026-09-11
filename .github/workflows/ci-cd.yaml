@@ -88,9 +88,10 @@ jobs:
         with:
           context: .
           push: true
-          tags: |
-            ${{ secrets.DOCKER_USERNAME }}/spark-app:${{ needs.setup-env.outputs.env_name }}
-            ${{ secrets.DOCKER_USERNAME }}/spark-app:${{ github.sha }}
+          tags: ${{ secrets.DOCKER_USERNAME }}/spark-app:${{ needs.setup-env.outputs.env_name }},${{ secrets.DOCKER_USERNAME }}/spark-app:${{ github.sha }}
+          #tags: |
+           # ${{ secrets.DOCKER_USERNAME }}/spark-app:${{ needs.setup-env.outputs.env_name }}
+           # ${{ secrets.DOCKER_USERNAME }}/spark-app:${{ github.sha }}
   # -------------------------------------------------------------
   # JOB 3 : Déploiement sécurisé sur le VPS (Utilisateur ryenon)
   # -------------------------------------------------------------
