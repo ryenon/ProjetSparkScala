@@ -20,10 +20,10 @@ ENV PATH=$PATH:$SPARK_HOME/bin
 
 RUN yum update -y && \
     yum install -y wget curl procps tar gzip && \
-    wget -q https://apache.org{SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \
-    tar -xzf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \
-    mv spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION} ${SPARK_HOME} && \
-    rm spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \
+    wget -q https://apache.org && \
+    tar -xzf spark-2.4.0-bin-hadoop2.7.tgz && \
+    mv spark-2.4.0-bin-hadoop2.7 /opt/spark && \
+    rm spark-2.4.0-bin-hadoop2.7.tgz && \
     yum clean all && \
     rm -rf /var/cache/yum
 
